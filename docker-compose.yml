@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  prism:
+    build: .
+    container_name: prism-bot
+    ports:
+      - "${PRISM_PORT:-8080}:8080"
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_API_BASE=${LLM_API_BASE:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-mimo-v2.5-pro}
+      - PRISM_LOG_LEVEL=${PRISM_LOG_LEVEL:-INFO}
+      - PRISM_DEFAULT_MODE=${PRISM_DEFAULT_MODE:-full}
+      - PRISM_MAX_DIFF_LINES=${PRISM_MAX_DIFF_LINES:-5000}
+      - PRISM_MAX_COMMENTS=${PRISM_MAX_COMMENTS:-50}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Redis for rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    container_name: prism-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    profiles:
+      - with-redis
+
+volumes:
+  redis_data:
