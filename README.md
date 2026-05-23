@@ -125,3 +125,8 @@ mypy prism/ agents/
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+
+## Changelog
+
+- v0.1.0 — Initial release
